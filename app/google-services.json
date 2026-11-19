@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "529209909856",
+    "project_id": "flynn-de277",
+    "storage_bucket": "flynn-de277.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:529209909856:android:713ab824e4bd7be2445905",
+        "android_client_info": {
+          "package_name": "com.example.doanltdd_flynn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7aZgPFefna5YwR0Y8uP95_JgDcA6Caww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
