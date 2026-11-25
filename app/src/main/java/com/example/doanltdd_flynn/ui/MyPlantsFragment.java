@@ -27,10 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Tab "Cây của tôi" (màn hình 4): thẻ tổng hợp chuỗi + danh sách cây, mỗi cây có chuỗi riêng
- * và nút chăm nhanh. Khách (chưa đăng nhập) không thấy chuỗi và không thêm được cây (A20).
- */
+
 public class MyPlantsFragment extends Fragment {
 
     private MyPlantController myPlantController;
