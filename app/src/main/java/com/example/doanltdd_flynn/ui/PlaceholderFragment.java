@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.doanltdd_flynn.R;
 
-/** Màn hình giữ chỗ cho các tab chưa làm (Trang chủ, Bách khoa, Cộng đồng, Cá nhân). */
 public class PlaceholderFragment extends Fragment {
     private static final String ARG_TEXT = "text";
 
