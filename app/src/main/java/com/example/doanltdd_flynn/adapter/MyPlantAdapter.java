@@ -20,7 +20,7 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Danh sách "Cây của tôi": mỗi dòng có chuỗi hiện tại, trạng thái chuỗi và nút chăm nhanh. */
+
 public class MyPlantAdapter extends RecyclerView.Adapter<MyPlantAdapter.ViewHolder> {
 
     public interface Listener {
