@@ -1,0 +1,163 @@
+package com.example.doanltdd_flynn.ui;
+
+import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.doanltdd_flynn.R;
+import com.example.doanltdd_flynn.controller.CareController;
+import com.example.doanltdd_flynn.controller.MyPlantController;
+import com.example.doanltdd_flynn.model.CareLog;
+import com.example.doanltdd_flynn.model.CareType;
+import com.example.doanltdd_flynn.utils.ChuoiUtil;
+import com.example.doanltdd_flynn.utils.UiUtil;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+
+
+import java.time.LocalDate;
+
+public class AddCareLogActivity extends AppCompatActivity {
+
+    public static final String EXTRA_PLANT_ID = "plant_id";
+    public static final String EXTRA_LOG_ID = "log_id";
+    public static final String EXTRA_LOG_DATE = "log_date";
+    public static final String EXTRA_LOG_TYPE = "log_type";
+    public static final String EXTRA_LOG_NOTE = "log_note";
+
+    private CareController careController;
+    private MyPlantController myPlantController;
+
+    private String userId;
+    private String plantId;
+    private String logId;        
+    private LocalDate careDate = ChuoiUtil.todayDate();
+
+    private TextView tvPlantName;
+    private TextView tvHint;
+    private TextInputEditText etDate;
+    private TextInputEditText etNote;
+    private MaterialAutoCompleteTextView actType;
+    private MaterialButton btnSave;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_care_log);
+        UiUtil.applyEdgeToEdge(this, findViewById(R.id.root));
+
+        plantId = getIntent().getStringExtra(EXTRA_PLANT_ID);
+        logId = getIntent().getStringExtra(EXTRA_LOG_ID);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (plantId == null || user == null) {
+            finish();
+            return;
+        }
+        userId = user.getUid();
+        careController = new CareController();
+        myPlantController = new MyPlantController();
+        boolean editing = logId != null;
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(editing ? "Sửa nhật ký" : "Ghi nhật ký");
+        toolbar.setNavigationOnClickListener(v -> finish());
+
+        tvPlantName = findViewById(R.id.tvPlantName);
+        tvHint = findViewById(R.id.tvHint);
+        etDate = findViewById(R.id.etDate);
+        etNote = findViewById(R.id.etNote);
+        actType = findViewById(R.id.actType);
+        btnSave = findViewById(R.id.btnSave);
+
+        // Danh sách loại chăm sóc (WATERING, FERTILIZING, PRUNING, OTHER) hiển thị bằng tiếng Việt
+        actType.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
+                UiUtil.careTypeLabels()));
+        actType.setText(UiUtil.careTypeLabel(CareType.WATERING), false);
+
+        if (editing) {
+            LocalDate old = ChuoiUtil.toDate(getIntent().getStringExtra(EXTRA_LOG_DATE));
+            if (old != null) careDate = old;
+            CareType oldType;
+            try {
+                oldType = CareType.valueOf(getIntent().getStringExtra(EXTRA_LOG_TYPE));
+            } catch (Exception e) {
+                oldType = CareType.OTHER;
+            }
+            actType.setText(UiUtil.careTypeLabel(oldType), false);
+            etNote.setText(getIntent().getStringExtra(EXTRA_LOG_NOTE));
+            btnSave.setText("Lưu thay đổi");
+        }
+        etDate.setText(ChuoiUtil.display(ChuoiUtil.toKey(careDate)));
+        updateHint();
+
+        etDate.setOnClickListener(v -> UiUtil.pickDate(this, careDate, date -> {
+            careDate = date;
+            etDate.setText(ChuoiUtil.display(ChuoiUtil.toKey(date)));
+            updateHint();
+        }));
+        btnSave.setOnClickListener(v -> save());
+
+        // Hiển thị tên cây đang ghi nhật ký
+        myPlantController.getMyPlantDetail(userId, plantId,
+                plant -> {
+                    if (isFinishing()) return;
+                    if (plant == null) {
+                        Toast.makeText(this, "Không tìm thấy cây", Toast.LENGTH_LONG).show();
+                        finish();
+                        return;
+                    }
+                    tvPlantName.setText(plant.getPlantName());
+                },
+                e -> tvPlantName.setText(""));
+    }
+
+    private void updateHint() {
+        if (logId != null) {
+            tvHint.setText("Sửa nhật ký không làm thay đổi chuỗi của cây.");
+        } else if (careDate.equals(ChuoiUtil.todayDate())) {
+            tvHint.setText("Nhật ký ngày hôm nay được tính là chăm sóc: cây này sẽ có thêm một ngày chăm. "
+                    + "Ghi nhiều nhật ký trong cùng ngày vẫn chỉ tính một ngày.");
+        } else {
+            tvHint.setText("Nhật ký cho ngày quá khứ vẫn được lưu nhưng không làm thay đổi chuỗi.");
+        }
+    }
+
+    private void save() {
+        String note = etNote.getText() == null ? "" : etNote.getText().toString();
+        CareType type = UiUtil.careTypeFromLabel(actType.getText() == null ? "" : actType.getText().toString());
+
+        CareLog log = new CareLog();
+        log.setCareLogId(logId);
+        log.setMyPlantId(plantId);
+        log.setCareDate(ChuoiUtil.toKey(careDate));
+        log.setCareType(type);
+        log.setNote(note);
+
+        btnSave.setEnabled(false);
+        if (logId != null) {
+            careController.updateCareLog(userId, log, unused -> onSaved("Đã cập nhật nhật ký"), this::onFailed);
+        } else {
+            careController.addCareLog(userId, log, unused -> onSaved("Đã lưu nhật ký"), this::onFailed);
+        }
+    }
+
+    private void onSaved(String message) {
+        btnSave.setEnabled(true);
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    private void onFailed(Exception e) {
+        btnSave.setEnabled(true);
+        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+    }
+}
+
