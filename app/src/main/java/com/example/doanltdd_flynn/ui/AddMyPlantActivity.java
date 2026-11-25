@@ -31,10 +31,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Thêm cây mới (màn hình 4.a). Không phân biệt cây đã có trong Bách khoa hay chưa:
- * người dùng chọn đề xuất có sẵn, gõ để tìm, hoặc nhập thẳng tên cây của mình.
- */
+
 public class AddMyPlantActivity extends AppCompatActivity {
 
     private static final int MAX_CHIPS = 10;
@@ -49,7 +46,7 @@ public class AddMyPlantActivity extends AppCompatActivity {
     private MaterialButton btnSave;
 
     private List<PlantSuggestion> suggestions = new ArrayList<>();
-    private String selectedPlantId = null;           // có giá trị khi tên khớp một cây Bách khoa
+    private String selectedPlantId = null;           
     private LocalDate plantingDate = ChuoiUtil.todayDate();
 
     @Override
@@ -82,7 +79,6 @@ public class AddMyPlantActivity extends AppCompatActivity {
             etDate.setText(ChuoiUtil.display(ChuoiUtil.toKey(date)));
         }));
 
-        // Mỗi khi tên thay đổi (gõ, chọn đề xuất, bấm chip) tự liên kết với cây Bách khoa nếu trùng tên
         actName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -126,7 +122,6 @@ public class AddMyPlantActivity extends AppCompatActivity {
         }, e -> { /* không tải được đề xuất thì người dùng vẫn nhập tên tay được */ });
     }
 
-    /** Tìm id cây Bách khoa theo tên (không phân biệt hoa thường, dấu). Không có thì trả null. */
     private String findPlantId(String typedName) {
         String key = TextUtil.normalize(typedName);
         if (key.isEmpty()) return null;
@@ -161,7 +156,6 @@ public class AddMyPlantActivity extends AppCompatActivity {
                 });
     }
 
-    /** Adapter gợi ý tìm theo tên, không phân biệt dấu và vị trí (gõ "ca" ra "Cà chua"). */
     private static class SuggestionAdapter extends ArrayAdapter<String> {
         private final List<String> all;
         private final List<String> shown = new ArrayList<>();
