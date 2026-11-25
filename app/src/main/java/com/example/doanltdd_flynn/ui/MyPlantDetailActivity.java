@@ -28,11 +28,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
-/**
- * Chi tiết cây + nhật ký (màn hình 5): chuỗi hiện tại, chuỗi dài nhất, tổng ngày chăm,
- * số ngày đồng hành, danh sách nhật ký (sửa / xóa) và nút ghi nhật ký.
- * Xóa cây lưu thẻ kỷ niệm vào lịch sử trồng cây (A15).
- */
+
 public class MyPlantDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_PLANT_ID = "plant_id";
