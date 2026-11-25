@@ -1,0 +1,93 @@
+package com.example.doanltdd_flynn.adapter;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.doanltdd_flynn.R;
+import com.example.doanltdd_flynn.model.CareLog;
+import com.example.doanltdd_flynn.utils.ChuoiUtil;
+import com.example.doanltdd_flynn.utils.UiUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class CareLogAdapter extends RecyclerView.Adapter<CareLogAdapter.ViewHolder> {
+
+    public interface Listener {
+        void onEdit(CareLog log);
+
+        void onDelete(CareLog log);
+    }
+
+    private List<CareLog> careLogs = new ArrayList<>();
+    private final Listener listener;
+
+    public CareLogAdapter(Listener listener) {
+        this.listener = listener;
+    }
+
+    public void submitList(List<CareLog> logs) {
+        this.careLogs = logs == null ? new ArrayList<>() : logs;
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_my_plant, parent, false);
+        return new ViewHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder h, int position) {
+        CareLog log = careLogs.get(position);
+        h.tvDate.setText(ChuoiUtil.display(log.getCareDate()));
+        h.tvType.setText(UiUtil.careTypeLabel(log.getCareType()));
+        h.tvNote.setText(log.getNote());
+
+        h.btnMore.setOnClickListener(anchor -> {
+            PopupMenu menu = new PopupMenu(anchor.getContext(), anchor);
+            menu.getMenuInflater().inflate(R.menu.menu_care_log_item, menu.getMenu());
+            menu.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.action_edit) {
+                    listener.onEdit(log);
+                    return true;
+                } else if (item.getItemId() == R.id.action_delete) {
+                    listener.onDelete(log);
+                    return true;
+                }
+                return false;
+            });
+            menu.show();
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return careLogs.size();
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        final TextView tvDate;
+        final TextView tvType;
+        final TextView tvNote;
+        final ImageButton btnMore;
+
+        ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvDate = itemView.findViewById(R.id.tvDate);
+            tvType = itemView.findViewById(R.id.tvType);
+            tvNote = itemView.findViewById(R.id.tvNote);
+            btnMore = itemView.findViewById(R.id.btnMore);
+        }
+    }
+}
+
