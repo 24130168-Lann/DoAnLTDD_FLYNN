@@ -3,7 +3,7 @@ package com.example.doanltdd_flynn.utils;
 import java.text.Normalizer;
 import java.util.Locale;
 
-/** Bỏ dấu tiếng Việt để tìm kiếm "ca chua" ra "Cà chua". */
+
 public final class TextUtil {
     private TextUtil() {
     }
