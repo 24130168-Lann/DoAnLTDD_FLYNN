@@ -14,7 +14,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable goToMain = () -> {
-        startActivity(new Intent(SplashActivity.this, MainActivity.class));
+        startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
         finish();
     };
 
