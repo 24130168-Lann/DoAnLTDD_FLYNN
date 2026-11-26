@@ -15,12 +15,12 @@ import com.example.doanltdd_flynn.model.CareType;
 import java.time.LocalDate;
 import java.util.function.Consumer;
 
-/** Tiện ích giao diện dùng chung cho các màn hình của Cây của tôi. */
+
 public final class UiUtil {
     private UiUtil() {
     }
 
-    /** Bật edge-to-edge và chừa chỗ cho thanh trạng thái / thanh điều hướng hệ thống. */
+   
     public static void applyEdgeToEdge(ComponentActivity activity, View root) {
         EdgeToEdge.enable(activity);
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
@@ -40,7 +40,7 @@ public final class UiUtil {
         dialog.show();
     }
 
-    /** Nhãn tiếng Việt của loại chăm sóc (enum CareType chỉ lưu tên tiếng Anh). */
+   
     public static String careTypeLabel(CareType type) {
         if (type == null) return "Việc khác";
         switch (type) {
