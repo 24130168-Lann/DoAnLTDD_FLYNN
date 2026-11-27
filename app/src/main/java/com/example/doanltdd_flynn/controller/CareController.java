@@ -1,137 +1,100 @@
-
 package com.example.doanltdd_flynn.controller;
 
 import com.example.doanltdd_flynn.model.CareLog;
+import com.example.doanltdd_flynn.model.CareType;
 import com.example.doanltdd_flynn.model.MyPlant;
 import com.example.doanltdd_flynn.repository.CareLogRepository;
 import com.example.doanltdd_flynn.repository.MyPlantRepository;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.example.doanltdd_flynn.repository.UserRepository;
 import com.example.doanltdd_flynn.utils.ChuoiUtil;
-import java.text.SimpleDateFormat;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class CareController {
     private final CareLogRepository careLogRepository;
     private final MyPlantRepository myPlantRepository;
     private final UserRepository userRepository;
 
-   public CareController() {
+    public CareController() {
         careLogRepository = new CareLogRepository();
         myPlantRepository = new MyPlantRepository();
         userRepository = new UserRepository();
     }
 
-    // Lấy ngày hiện tại theo múi giờ Việt Nam
-    private String getToday() {
-        SimpleDateFormat sdf =
-                new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-
-        return sdf.format(new Date());
+    // Kiểm tra dữ liệu nhật ký (A06). Trả về thông báo lỗi, hoặc null nếu hợp lệ.
+    private String validate(CareLog careLog) {
+        if (careLog == null || careLog.getMyPlantId() == null) {
+            return "Không xác định được cây cần ghi nhật ký";
+        }
+        LocalDate date = ChuoiUtil.toDate(careLog.getCareDate());
+        if (date == null) {
+            return "Vui lòng chọn ngày ghi nhật ký";
+        }
+        if (date.isAfter(ChuoiUtil.todayDate())) {
+            return "Ngày ghi nhật ký không được ở tương lai";
+        }
+        if (careLog.getNote() == null || careLog.getNote().trim().isEmpty()) {
+            return "Vui lòng nhập ghi chú";
+        }
+        return null;
     }
-
-
-
-    // Thêm nhật ký chăm sóc
     public void addCareLog(String userId,
                            CareLog careLog,
                            OnSuccessListener<Void> successListener,
                            OnFailureListener failureListener) {
 
-        careLogRepository.insert(userId, careLog, unused -> {
+        String error = validate(careLog);
+        if (error != null) {
+            failureListener.onFailure(new IllegalArgumentException(error));
+            return;
+        }
 
-            // Chỉ cập nhật chuỗi nếu nhật ký là hôm nay
-            if (!getToday().equals(careLog.getCareDate())) {
-                successListener.onSuccess(null);
+        careLog.setNote(careLog.getNote().trim());
+        if (careLog.getCareType() == null) {
+            careLog.setCareType(CareType.OTHER);
+        }
+
+        final String today = ChuoiUtil.today();
+
+        // A14: nhật ký ngày quá khứ chỉ được lưu, không làm thay đổi chuỗi
+        if (!today.equals(careLog.getCareDate())) {
+            careLogRepository.insert(userId, careLog, successListener, failureListener);
+            return;
+        }
+
+        // Nhật ký hôm nay = hành động chăm sóc: cần chuỗi mới để cập nhật kỷ lục
+        myPlantRepository.findById(userId, careLog.getMyPlantId(), plant -> {
+
+            if (plant == null) {
+                failureListener.onFailure(new Exception("Không tìm thấy cây"));
                 return;
             }
 
-            myPlantRepository.findById(
-                    userId,
-                    careLog.getMyPlantId(),
-                    plant -> {
+            List<String> careDays = new ArrayList<>(plant.getCareDays());
+            if (!careDays.contains(today)) {
+                careDays.add(today);
+            }
+            final int newStreak = ChuoiUtil.calculateCurrentStreak(careDays);
 
-                        if (plant == null) {
-                            failureListener.onFailure(
-                                    new Exception("Không tìm thấy cây")
-                            );
-                            return;
-                        }
+            userRepository.getMaxStreakRecord(userId, oldRecord -> {
 
-                        List<String> oldCareDays = plant.getCareDays();
+                // Chỉ ghi kỷ lục khi thật sự tăng
+                Integer newRecord = newStreak > oldRecord ? newStreak : null;
 
-                        final List<String> careDays;
+                careLogRepository.insertWithCare(userId, careLog, today, newRecord,
+                        successListener, failureListener);
 
-                        if (oldCareDays == null) {
-                            careDays = new ArrayList<>();
-                        } else {
-                            careDays = new ArrayList<>(oldCareDays);
-                        }
+            }, failureListener);
 
-                        // Một ngày chỉ được tính một lần
-                        if (!careDays.contains(getToday())) {
-                            careDays.add(getToday());
-                        }
-
-                        plant.setCareDays(careDays);
-
-                        // Cập nhật ngày chăm sóc của cây
-                        myPlantRepository.update(
-                                userId,
-                                plant,
-                                unusedPlant -> {
-
-                                    // Tính chuỗi chăm sóc dài nhất
-                                    int longestStreak =
-                                            ChuoiUtil.calculateLongestStreak(careDays);
-
-                                    // Lấy thông tin tài khoản
-                                    userRepository.findById(
-                                            userId,
-                                            user -> {
-
-                                                if (user == null) {
-                                                    failureListener.onFailure(
-                                                            new Exception("Không tìm thấy người dùng")
-                                                    );
-                                                    return;
-                                                }
-
-                                                // Chỉ cập nhật nếu có kỷ lục mới
-                                                if (longestStreak > user.getMaxStreakRecord()) {
-
-                                                    userRepository.updateMaxStreakRecord(
-                                                            userId,
-                                                            longestStreak,
-                                                            successListener,
-                                                            failureListener
-                                                    );
-
-                                                } else {
-                                                    successListener.onSuccess(null);
-                                                }
-                                            },
-                                            failureListener
-                                    );
-                                },
-                                failureListener
-                        );
-                    },
-                    failureListener
-            );
         }, failureListener);
     }
 
-
-
-    // Lấy danh sách nhật ký chăm sóc của cây
+    // Lấy danh sách nhật ký chăm sóc của cây (mới nhất lên đầu)
     public void getCareLogs(String userId,
                             String myPlantId,
                             OnSuccessListener<List<CareLog>> successListener,
@@ -140,17 +103,31 @@ public class CareController {
         careLogRepository.getByMyPlantId(
                 userId,
                 myPlantId,
-                successListener,
+                list -> {
+                    Collections.sort(list, (a, b) -> {
+                        String da = a.getCareDate() == null ? "" : a.getCareDate();
+                        String db = b.getCareDate() == null ? "" : b.getCareDate();
+                        return db.compareTo(da);
+                    });
+                    successListener.onSuccess(list);
+                },
                 failureListener
         );
     }
 
-    // Cập nhật nhật ký chăm sóc
-    // Đã bổ sung userId vào tham số
+    // Cập nhật nhật ký chăm sóc (A14: không làm thay đổi ngày chăm)
     public void updateCareLog(String userId,
                               CareLog careLog,
                               OnSuccessListener<Void> successListener,
                               OnFailureListener failureListener) {
+
+        String error = validate(careLog);
+        if (error != null || careLog.getCareLogId() == null) {
+            failureListener.onFailure(new IllegalArgumentException(
+                    error != null ? error : "Không xác định được nhật ký cần sửa"));
+            return;
+        }
+        careLog.setNote(careLog.getNote().trim());
 
         careLogRepository.update(
                 userId,
@@ -160,7 +137,7 @@ public class CareController {
         );
     }
 
-    // Xóa một nhật ký chăm sóc
+    // Xóa một nhật ký chăm sóc (A14: không làm thay đổi ngày chăm)
     public void deleteCareLog(String userId,
                               String myPlantId,
                               String careLogId,
@@ -176,4 +153,3 @@ public class CareController {
         );
     }
 }
-
