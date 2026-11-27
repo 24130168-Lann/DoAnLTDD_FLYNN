@@ -90,4 +90,3 @@ public class CareLogAdapter extends RecyclerView.Adapter<CareLogAdapter.ViewHold
         }
     }
 }
-
