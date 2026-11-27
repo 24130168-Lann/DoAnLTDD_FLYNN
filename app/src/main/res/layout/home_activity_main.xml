@@ -1,0 +1,22 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/main" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/flynn_bg" android:fitsSystemWindows="true" tools:context=".MainActivity">
+    <!--  Phần nội dung: cuộn được  -->
+    <ScrollView android:id="@+id/scrollContent" android:layout_width="0dp" android:layout_height="0dp" android:overScrollMode="never" android:scrollbars="none" app:layout_constraintBottom_toTopOf="@id/bottomNav" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:focusable="true" android:focusableInTouchMode="true" android:orientation="vertical" android:paddingTop="12dp" android:paddingBottom="16dp">
+
+            <include layout="@layout/home_layout_streak"/>
+            <include layout="@layout/home_layout_my_plants"/>
+            <include layout="@layout/home_layout_categories"/>
+            <include layout="@layout/home_layout_tips"/>
+            <include layout="@layout/home_layout_community"/>
+        </LinearLayout>
+    </ScrollView>
+    <!--  Thanh điều hướng: nằm ngoài ScrollView nên luôn cố định ở giữa đáy màn hình  -->
+    <LinearLayout android:id="@+id/bottomNav" android:layout_width="0dp" android:layout_height="60dp" android:layout_marginStart="16dp" android:layout_marginTop="8dp" android:layout_marginEnd="16dp" android:layout_marginBottom="12dp" android:background="@drawable/bg_bottom_nav" android:gravity="center" android:orientation="horizontal" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent">
+        <!--  Tab đang chọn (Trang chủ) tô xanh, các tab còn lại màu xám đậm  -->
+        <ImageView android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:contentDescription="Trang chủ" android:padding="14dp" android:src="@drawable/ic_home" app:tint="@color/flynn_green"/>
+        <ImageView android:id="@+id/navEncyclopedia" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:contentDescription="Bách khoa" android:padding="14dp" android:src="@drawable/ic_book" app:tint="@color/flynn_nav_off"/>
+        <ImageView android:id="@+id/navMyPlants" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:contentDescription="Cây của tôi" android:padding="14dp" android:src="@drawable/ic_plant" app:tint="@color/flynn_nav_off"/>
+        <ImageView android:id="@+id/navCommunity" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:contentDescription="Cộng đồng" android:padding="14dp" android:src="@drawable/ic_communnity" app:tint="@color/flynn_nav_off"/>
+        <ImageView android:id="@+id/navProfile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:contentDescription="Cá nhân" android:padding="14dp" android:src="@drawable/ic_person" app:tint="@color/flynn_nav_off"/>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
