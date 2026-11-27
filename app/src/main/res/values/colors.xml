@@ -2,4 +2,24 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Xanh thương hiệu -->
+    <color name="green">#2F6B4F</color>
+    <color name="green_dark">#245D46</color>
+    <color name="green_light">#E3F0E8</color>
+
+    <!-- Cam: trạng thái "Chờ chăm sóc", lửa chuỗi, nhãn Hỏi đáp, nút thích -->
+    <color name="orange">#F57C00</color>
+    <color name="orange_light">#FFF1E0</color>
+
+    <!-- Xám: trạng thái "Chưa có chuỗi", nhãn Mẹo hay -->
+    <color name="grey">#7A8580</color>
+    <color name="grey_light">#ECEEEA</color>
+
+    <!-- Chữ -->
+    <color name="text">#26352B</color>
+    <color name="text_secondary">#6B7A70</color>
+
+    <!-- Nền màn hình và thẻ -->
+    <color name="background">#F5F0E6</color>
+    <color name="surface">#FFFFFF</color>
 </resources>
