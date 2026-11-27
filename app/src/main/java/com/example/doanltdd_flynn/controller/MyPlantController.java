@@ -1,34 +1,59 @@
-
 package com.example.doanltdd_flynn.controller;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-import com.example.doanltdd_flynn.utils.ChuoiUtil;
 import com.example.doanltdd_flynn.model.MyPlant;
 import com.example.doanltdd_flynn.model.PlantHistory;
+import com.example.doanltdd_flynn.model.PlantSuggestion;
+import com.example.doanltdd_flynn.model.StreakSummary;
 import com.example.doanltdd_flynn.repository.MyPlantRepository;
 import com.example.doanltdd_flynn.repository.PlantHistoryRepository;
+import com.example.doanltdd_flynn.repository.PlantSuggestionRepository;
+import com.example.doanltdd_flynn.repository.UserRepository;
+import com.example.doanltdd_flynn.utils.ChuoiUtil;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.example.doanltdd_flynn.repository.CareLogRepository;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MyPlantController {
 
     private MyPlantRepository myPlantRepository;
     private PlantHistoryRepository plantHistoryRepository;
-    private CareLogRepository careLogRepository;
+    private UserRepository userRepository;
+    private PlantSuggestionRepository plantSuggestionRepository;
+
     public MyPlantController() {
         myPlantRepository = new MyPlantRepository();
         plantHistoryRepository = new PlantHistoryRepository();
-        careLogRepository = new CareLogRepository();
+        userRepository = new UserRepository();
+        plantSuggestionRepository = new PlantSuggestionRepository();
     }
 
-    // Thêm cây cá nhân
-    public void addMyPlant(MyPlant myPlant,
+   public void addMyPlant(MyPlant myPlant,
                            OnSuccessListener<Void> successListener,
                            OnFailureListener failureListener) {
+
+        if (myPlant == null || myPlant.getUserId() == null) {
+            failureListener.onFailure(new IllegalArgumentException("Vui lòng đăng nhập để thêm cây"));
+            return;
+        }
+        if (myPlant.getPlantName() == null || myPlant.getPlantName().trim().isEmpty()) {
+            failureListener.onFailure(new IllegalArgumentException("Vui lòng nhập hoặc chọn tên cây"));
+            return;
+        }
+        LocalDate planting = ChuoiUtil.toDate(myPlant.getPlantingDate());
+        if (planting == null) {
+            failureListener.onFailure(new IllegalArgumentException("Vui lòng chọn ngày bắt đầu trồng"));
+            return;
+        }
+        if (planting.isAfter(ChuoiUtil.todayDate())) {
+            failureListener.onFailure(new IllegalArgumentException("Ngày bắt đầu trồng không được ở tương lai"));
+            return;
+        }
+
+        myPlant.setPlantName(myPlant.getPlantName().trim());
+        myPlant.setCareDays(new ArrayList<>()); // ngày trồng ở quá khứ không tạo ngày chăm
 
         myPlantRepository.insert(
                 myPlant,
@@ -37,16 +62,42 @@ public class MyPlantController {
         );
     }
 
-    // Lấy danh sách cây của người dùng
+    // Lấy danh sách cây của người dùng (cây "chờ chăm" được đưa lên đầu)
     public void getMyPlants(String userId,
                             OnSuccessListener<List<MyPlant>> successListener,
                             OnFailureListener failureListener) {
 
         myPlantRepository.getByUserId(
                 userId,
-                successListener,
+                list -> successListener.onSuccess(ChuoiUtil.sortForDisplay(list)),
                 failureListener
         );
+    }
+
+    public void getStreakSummary(String userId,
+                                 OnSuccessListener<StreakSummary> successListener,
+                                 OnFailureListener failureListener) {
+
+        myPlantRepository.getByUserId(userId, plants ->
+                        userRepository.getMaxStreakRecord(userId, record ->
+                                        successListener.onSuccess(ChuoiUtil.summarize(plants, record)),
+                                failureListener),
+                failureListener);
+    }
+
+    // THÊM MỚI: kỷ lục chuỗi của tài khoản
+    public void getMaxStreakRecord(String userId,
+                                   OnSuccessListener<Integer> successListener,
+                                   OnFailureListener failureListener) {
+
+        userRepository.getMaxStreakRecord(userId, successListener, failureListener);
+    }
+
+    // THÊM MỚI: danh sách đề xuất khi thêm cây (Bách khoa hoặc danh sách mặc định)
+    public void getPlantSuggestions(OnSuccessListener<List<PlantSuggestion>> successListener,
+                                    OnFailureListener failureListener) {
+
+        plantSuggestionRepository.getSuggestions(successListener, failureListener);
     }
 
     // Lấy chi tiết một cây
@@ -76,24 +127,30 @@ public class MyPlantController {
         );
     }
 
-    // Lấy lịch sử cây đã xóa
+    // Lấy lịch sử cây đã xóa (mới xóa lên đầu)
     public void getHistory(String userId,
                            OnSuccessListener<List<PlantHistory>> successListener,
                            OnFailureListener failureListener) {
 
         plantHistoryRepository.getByUserId(
                 userId,
-                successListener,
+                list -> {
+                    Collections.sort(list, (a, b) -> {
+                        String da = a.getDeletedAt() == null ? "" : a.getDeletedAt();
+                        String db = b.getDeletedAt() == null ? "" : b.getDeletedAt();
+                        return db.compareTo(da);
+                    });
+                    successListener.onSuccess(list);
+                },
                 failureListener
         );
     }
-    // Xóa cây cá nhân và lưu lại lịch sử
+
     public void deleteMyPlant(String userId,
                               String myPlantId,
                               OnSuccessListener<Void> successListener,
                               OnFailureListener failureListener) {
 
-        // Bước 1: Tìm cây cần xóa
         myPlantRepository.findById(userId, myPlantId, plant -> {
 
             if (plant == null) {
@@ -102,13 +159,9 @@ public class MyPlantController {
                 return;
             }
 
-            // Bước 2: Lấy ngày xóa và tính số ngày đồng hành
-            String deletedAt = getDeletedAt();
-
-            int companionDays = calculateCompanionDays(
-                    plant.getPlantingDate(),
-                    deletedAt
-            );
+            String deletedAt = ChuoiUtil.today();
+            int companionDays = ChuoiUtil.calculateCompanionDays(
+                    plant.getPlantingDate(), deletedAt);
 
             if (companionDays <= 0) {
                 failureListener.onFailure(
@@ -116,12 +169,8 @@ public class MyPlantController {
                 return;
             }
 
-            // Bước 3: Tính chuỗi chăm sóc dài nhất
-            int longestStreak = ChuoiUtil.calculateLongestStreak(
-                    plant.getCareDays()
-            );
+            int longestStreak = ChuoiUtil.calculateLongestStreak(plant.getCareDays());
 
-            // Bước 4: Tạo lịch sử cây
             PlantHistory history = new PlantHistory(
                     null,
                     userId,
@@ -132,60 +181,10 @@ public class MyPlantController {
                     deletedAt
             );
 
-            // Bước 5: Lưu lịch sử
-            plantHistoryRepository.insert(history, unused -> {
-
-                // Bước 6: Xóa toàn bộ nhật ký chăm sóc
-                careLogRepository.deleteAllByMyPlantId(
-                        userId,
-                        myPlantId,
-                        unusedLogs -> {
-
-                            // Bước 7: Xóa cây
-                            myPlantRepository.delete(
-                                    userId,
-                                    myPlantId,
-                                    successListener,
-                                    failureListener
-                            );
-
-                        },
-                        failureListener
-                );
-
-            }, failureListener);
+            myPlantRepository.deleteWithHistory(
+                    userId, myPlantId, history,
+                    successListener, failureListener);
 
         }, failureListener);
     }
-    private int calculateCompanionDays(String plantingDate, String deletedAt) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat(
-                    "yyyy/MM/dd", Locale.getDefault());
-
-            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-            sdf.setLenient(false);
-
-            Date startDate = sdf.parse(plantingDate);
-            Date endDate = sdf.parse(deletedAt);
-            if (startDate == null || endDate == null) {
-                return 0;
-            }
-
-            long difference = endDate.getTime() - startDate.getTime();
-
-            return (int) (difference / (24 * 60 * 60 * 1000)) + 1;
-
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-    private String getDeletedAt() {
-        SimpleDateFormat sdf = new SimpleDateFormat(
-                "yyyy/MM/dd", Locale.getDefault());
-
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-
-        return sdf.format(new Date());
-    }
 }
-
