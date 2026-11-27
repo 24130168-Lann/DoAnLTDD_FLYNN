@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollCharacteristics"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F0E6"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:paddingBottom="32dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp">
+
+        <!-- Thanh điều hướng trên cùng -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnBackChar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Quay lại"
+                android:src="@android:drawable/ic_media_previous" />
+
+            <TextView
+                android:id="@+id/tvCharTopLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:letterSpacing="0.12"
+                android:text="ĐẶC ĐIỂM THỰC VẬT"
+                android:textColor="#4A443F"
+                android:textSize="11.5sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressChar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvCharError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:textColor="#9E2A2B"
+            android:textSize="13.5sp"
+            android:visibility="gone" />
+
+        <!-- Tiêu đề loài cây -->
+        <TextView
+            android:id="@+id/tvCharCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:letterSpacing="0.1"
+            android:textColor="#6E655D"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvCharCommonName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#2C1E2A"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvCharEnglishName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#5C534A"
+            android:textSize="14.5sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/tvCharScientificName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#6E655D"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Ảnh minh họa chính -->
+        <ImageView
+            android:id="@+id/ivCharMainImage"
+            android:layout_width="match_parent"
+            android:layout_height="210dp"
+            android:layout_marginTop="14dp"
+            android:background="#E6DEC8"
+            android:contentDescription="Ảnh đặc điểm cây"
+            android:scaleType="centerCrop" />
+
+        <!-- Khối đặc điểm nổi bật -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="#FCF9F2"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvCharFeatureTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đặc điểm nổi bật"
+                android:textColor="#2C1E2A"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvCharFeatureContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="4dp"
+                android:textColor="#2E2925"
+                android:textSize="13.5sp" />
+
+            <ImageView
+                android:id="@+id/ivCharPartImage"
+                android:layout_width="match_parent"
+                android:layout_height="170dp"
+                android:layout_marginTop="12dp"
+                android:background="#E6DEC8"
+                android:contentDescription="Ảnh chi tiết bộ phận"
+                android:scaleType="centerCrop" />
+        </LinearLayout>
+
+        <!-- Khối thông tin sinh trưởng & điều kiện -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="#FCF9F2"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Điều kiện &amp; Thông tin tổng quan"
+                android:textColor="#2C1E2A"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvCharOrigin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#352F2A"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvCharSeason"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#352F2A"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvCharLight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#352F2A"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvCharIntro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:lineSpacingExtra="4dp"
+                android:textColor="#2E2925"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

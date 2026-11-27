@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootEncyclopedia"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F0E6"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="14dp">
+
+    <TextView
+        android:id="@+id/tvEncyclopediaTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bách khoa toàn thư"
+        android:textColor="#2C1E2A"
+        android:textSize="26sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvEncyclopediaSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Khám phá đặc điểm, cấu tạo và môi trường sống của từng loài cây"
+        android:textColor="#5C534A"
+        android:textSize="13sp" />
+
+    <EditText
+        android:id="@+id/etSearchPlant"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginTop="12dp"
+        android:background="#FCF9F2"
+        android:hint="Tìm theo tên tiếng Việt, tên khoa học..."
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:paddingHorizontal="14dp"
+        android:singleLine="true"
+        android:textColor="#2C1E2A"
+        android:textColorHint="#8A8075"
+        android:textSize="14sp" />
+
+    <HorizontalScrollView
+        android:id="@+id/hsvCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/categoryContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
+    <ProgressBar
+        android:id="@+id/progressEncyclopedia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="24dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvEncyclopediaStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:textColor="#6E655D"
+        android:textSize="13.5sp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPlants"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp" />
+
+</LinearLayout>
