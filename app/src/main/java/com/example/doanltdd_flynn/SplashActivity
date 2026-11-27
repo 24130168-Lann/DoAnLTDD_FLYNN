@@ -13,8 +13,9 @@ public class SplashActivity extends AppCompatActivity {
     private static final long SPLASH_DELAY_MS = 1500;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
+
     private final Runnable goToMain = () -> {
-        startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
+        startActivity(new Intent(SplashActivity.this, MainActivity.class));
         finish();
     };
 
