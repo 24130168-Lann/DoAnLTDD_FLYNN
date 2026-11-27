@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/flynn_background">
+
+    <!-- Thanh tiêu đề -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/flynn_background"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="Thêm cây mới"
+        app:titleTextColor="@color/flynn_text"
+        app:elevation="0dp" />
+
+    <!-- Nội dung có thể cuộn -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollAddPlant"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        android:overScrollMode="always"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="28dp">
+
+            <!-- Logo và lời chào -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/imgFlynnLogo"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/flynn_ic_logo"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Logo Flynn" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Bắt đầu hành trình xanh!"
+                        android:textColor="@color/flynn_text"
+                        android:textSize="19sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="Thêm một người bạn xanh vào khu vườn."
+                        android:textColor="@color/flynn_text_secondary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Tìm kiếm -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="Tìm cây trong Bách khoa"
+                android:textColor="@color/flynn_text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSearch"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:hint="Nhập tên cây muốn tìm"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textSize="14sp"
+                    android:inputType="textCapSentences"
+                    android:singleLine="true"
+                    android:completionThreshold="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Gợi ý -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Gợi ý cho bạn"
+                android:textColor="@color/flynn_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Thẻ Cà chua -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardTomato"
+                android:layout_width="match_parent"
+                android:layout_height="90dp"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="@color/flynn_surface"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E5E8DF"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:id="@+id/imgTomato"
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_plant"
+                        android:contentDescription="Cây cà chua" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Cà chua"
+                            android:textColor="@color/flynn_text"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="Solanum lycopersicum"
+                            android:textColor="@color/flynn_text_secondary"
+                            android:textSize="11sp"
+                            android:fontFamily="serif"
+                            android:textStyle="italic" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSelectTomato"
+                        android:layout_width="76dp"
+                        android:layout_height="36dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:text="Chọn"
+                        android:textSize="12sp"
+                        app:cornerRadius="10dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Thẻ Húng quế -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardBasil"
+                android:layout_width="match_parent"
+                android:layout_height="90dp"
+                android:layout_marginTop="9dp"
+                app:cardBackgroundColor="@color/flynn_surface"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E5E8DF"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:id="@+id/imgBasil"
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_plant"
+                        android:contentDescription="Cây húng quế" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Húng quế"
+                            android:textColor="@color/flynn_text"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="Ocimum basilicum"
+                            android:textColor="@color/flynn_text_secondary"
+                            android:textSize="11sp"
+                            android:fontFamily="serif"
+                            android:textStyle="italic" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSelectBasil"
+                        android:layout_width="76dp"
+                        android:layout_height="36dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:text="Chọn"
+                        android:textSize="12sp"
+                        app:cornerRadius="10dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Thông tin cây -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="Thông tin cây của bạn"
+                android:textColor="@color/flynn_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Tên cây -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilName"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:hint="Tên cây *"
+                app:endIconMode="clear_text"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textSize="14sp"
+                    android:inputType="textCapSentences"
+                    android:singleLine="true"
+                    android:completionThreshold="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Ngày trồng -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDate"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:hint="Ngày bắt đầu trồng *"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textSize="14sp"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:inputType="none" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Giai đoạn -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Giai đoạn hiện tại"
+                android:textColor="@color/flynn_text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipStage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                app:singleSelection="true"
+                app:selectionRequired="false">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSeed"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gieo hạt"
+                    android:textSize="12sp"
+                    android:checkable="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSprout"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nảy mầm"
+                    android:textSize="12sp"
+                    android:checkable="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipGrowing"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Phát triển"
+                    android:textSize="12sp"
+                    android:checkable="true" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+            <!-- Ghi chú -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilNote"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:hint="Ghi chú (không bắt buộc)"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:textSize="14sp"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:minLines="2"
+                    android:maxLines="4" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Đề xuất Bách khoa -->
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/cbSuggest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Đề xuất bổ sung cây này vào Bách khoa"
+                android:textColor="@color/flynn_text"
+                android:textSize="12sp" />
+
+            <!-- Giữ ID tương thích với Java hiện tại -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipSuggestions"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+
+            <!-- Nút thêm cây -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="14dp"
+                android:text="Thêm vào vườn"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="14dp" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="#2F6B4F"
+    android:paddingStart="35dp"
+    android:paddingEnd="35dp"
+    android:paddingTop="15dp"
+    android:paddingBottom="25dp">
+
+    <!-- Khoảng trống phía trên logo -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="33dp"
+        android:layout_weight="1" />
+
+    <!-- Logo gốc Flynn -->
+
+    <!-- Slogan -->
+
+    <ImageView
+        android:id="@+id/imgWelcomeLogo"
+        android:layout_width="295dp"
+        android:layout_height="232dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="Logo Flynn"
+        android:scaleType="fitCenter"
+        android:src="@drawable/flynn_logo" />
+
+    <TextView
+        android:id="@+id/tvWelcomeSlogan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="Trồng cây · Ghi nhật ký · Giữ chuỗi mỗi ngày"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:maxLines="2"
+        android:includeFontPadding="false" />
+
+    <!-- Khoảng cách giữa slogan và nút -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Nút đăng nhập -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="ĐĂNG NHẬP"
+        android:textColor="#245D46"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:backgroundTint="#FFFFFF"
+        app:cornerRadius="4dp"
+        app:strokeWidth="0dp" />
+
+    <!-- Nút tạo tài khoản -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="10dp"
+        android:text="TẠO TÀI KHOẢN"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:backgroundTint="#245D46"
+        app:cornerRadius="4dp"
+        app:strokeWidth="0dp" />
+
+    <!-- Khoảng trống phía dưới -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25" />
+
+</LinearLayout>

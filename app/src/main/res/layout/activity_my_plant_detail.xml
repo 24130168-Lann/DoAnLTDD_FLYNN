@@ -1,0 +1,45 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/flynn_background" android:orientation="vertical">
+    <com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize" app:navigationIcon="@drawable/ic_arrow_back" app:title="Chi tiết cây"/>
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+            <!--  Chuỗi hiện tại của cây  -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_summary" android:orientation="vertical" android:padding="18dp">
+                <TextView android:id="@+id/tvName" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên cây" android:textColor="@color/white" android:textSize="20sp" android:textStyle="bold"/>
+                <TextView android:id="@+id/tvPlantingDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bắt đầu trồng: " android:textColor="#CCFFFFFF" android:textSize="13sp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="36dp" android:layout_height="36dp" android:importantForAccessibility="no" android:src="@drawable/ic_fire"/>
+                    <TextView android:id="@+id/tvStreak" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="0" android:textColor="@color/white" android:textSize="40sp" android:textStyle="bold"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:layout_marginTop="12dp" android:text="ngày liên tiếp" android:textColor="@color/white" android:textSize="16sp"/>
+                </LinearLayout>
+                <TextView android:id="@+id/tvStreakState" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@drawable/bg_status" android:paddingStart="10dp" android:paddingTop="3dp" android:paddingEnd="10dp" android:paddingBottom="3dp" android:text="Chưa có chuỗi" android:textSize="12sp" android:textStyle="bold"/>
+            </LinearLayout>
+            <!--  3 chỉ số: dài nhất / tổng ngày chăm / số ngày đồng hành  -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal">
+                <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginEnd="6dp" android:layout_weight="1" app:cardBackgroundColor="@color/flynn_surface" app:cardCornerRadius="14dp" app:cardElevation="0dp" app:strokeColor="#1A000000" app:strokeWidth="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="12dp">
+                        <TextView android:id="@+id/tvLongest" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/flynn_green_dark" android:textSize="22sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chuỗi dài nhất" android:textColor="@color/flynn_text_secondary" android:textSize="11sp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" android:layout_weight="1" app:cardBackgroundColor="@color/flynn_surface" app:cardCornerRadius="14dp" app:cardElevation="0dp" app:strokeColor="#1A000000" app:strokeWidth="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="12dp">
+                        <TextView android:id="@+id/tvTotalCare" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/flynn_green_dark" android:textSize="22sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ngày đã chăm" android:textColor="@color/flynn_text_secondary" android:textSize="11sp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:layout_weight="1" app:cardBackgroundColor="@color/flynn_surface" app:cardCornerRadius="14dp" app:cardElevation="0dp" app:strokeColor="#1A000000" app:strokeWidth="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="12dp">
+                        <TextView android:id="@+id/tvCompanion" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/flynn_green_dark" android:textSize="22sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ngày đồng hành" android:textColor="@color/flynn_text_secondary" android:textSize="11sp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+            <TextView android:id="@+id/tvNote" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textColor="@color/flynn_text" android:textSize="14sp" android:visibility="gone"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Chuỗi tính từ khi bạn bắt đầu ghi nhận trên Flynn. Ngày đổi lúc 00:00 giờ Việt Nam (Asia/Ho_Chi_Minh)." android:textColor="@color/flynn_text_secondary" android:textSize="12sp"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnAddLog" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="16dp" android:text="Ghi nhật ký hôm nay"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="Nhật ký" android:textColor="@color/flynn_text" android:textSize="18sp" android:textStyle="bold"/>
+            <TextView android:id="@+id/tvEmptyLogs" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="12dp" android:text="Chưa có nhật ký nào. Ghi nhật ký hôm nay để bắt đầu chuỗi!" android:textColor="@color/flynn_text_secondary" android:textSize="14sp"/>
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvLogs" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:nestedScrollingEnabled="false"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

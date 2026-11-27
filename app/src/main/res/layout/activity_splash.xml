@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/splashRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2F6B4F">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="32dp">
+
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="366dp"
+            android:layout_height="270dp"
+            android:contentDescription="Logo Flynn"
+            android:src="@drawable/flynn_logo" />
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="64dp"
+        android:indeterminateTint="@color/white" />
+
+</FrameLayout>

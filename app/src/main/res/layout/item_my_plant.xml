@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="2dp"
+    android:layout_marginEnd="2dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="6dp"
+    app:cardBackgroundColor="@color/flynn_surface"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#1A000000"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- Ảnh cây -->
+        <ImageView
+            android:id="@+id/imgPlant"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_avatar"
+            android:clipToOutline="true"
+            android:contentDescription="Ảnh cây trồng"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_plant" />
+
+        <!-- Thông tin cây -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Tên cây"
+                android:textColor="#26352B"                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Trồng từ 01/01/2026 · 10 ngày đồng hành"
+                android:textColor="@color/flynn_text_secondary"
+                android:textSize="12sp" />
+
+            <!-- Chuỗi chăm sóc và trạng thái -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:contentDescription="Chuỗi chăm sóc"
+                    android:src="@drawable/ic_fire" />
+
+                <TextView
+                    android:id="@+id/tvStreak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="0 ngày"
+                    android:textColor="#26352B"                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="7dp"
+                    android:background="@drawable/bg_status"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:text="Chưa có chuỗi"
+                    android:textColor="@color/flynn_grey"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Nút chăm nhanh -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnQuickCare"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginStart="6dp"
+            android:minWidth="0dp"
+            android:minHeight="36dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="Chăm nhanh"
+            android:textSize="11sp"
+            app:cornerRadius="10dp" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
