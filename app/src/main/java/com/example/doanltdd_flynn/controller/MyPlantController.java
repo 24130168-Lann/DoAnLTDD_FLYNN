@@ -30,7 +30,8 @@ public class MyPlantController {
         plantSuggestionRepository = new PlantSuggestionRepository();
     }
 
-   public void addMyPlant(MyPlant myPlant,
+  
+    public void addMyPlant(MyPlant myPlant,
                            OnSuccessListener<Void> successListener,
                            OnFailureListener failureListener) {
 
@@ -74,6 +75,7 @@ public class MyPlantController {
         );
     }
 
+    
     public void getStreakSummary(String userId,
                                  OnSuccessListener<StreakSummary> successListener,
                                  OnFailureListener failureListener) {
@@ -146,11 +148,13 @@ public class MyPlantController {
         );
     }
 
+  
     public void deleteMyPlant(String userId,
                               String myPlantId,
                               OnSuccessListener<Void> successListener,
                               OnFailureListener failureListener) {
 
+        //  Tìm cây cần xóa
         myPlantRepository.findById(userId, myPlantId, plant -> {
 
             if (plant == null) {
@@ -159,6 +163,7 @@ public class MyPlantController {
                 return;
             }
 
+            //  Ngày xóa và số ngày đồng hành (tính cả hai đầu - A18)
             String deletedAt = ChuoiUtil.today();
             int companionDays = ChuoiUtil.calculateCompanionDays(
                     plant.getPlantingDate(), deletedAt);
@@ -169,8 +174,10 @@ public class MyPlantController {
                 return;
             }
 
+            //  Chuỗi dài nhất của cây
             int longestStreak = ChuoiUtil.calculateLongestStreak(plant.getCareDays());
 
+            //  Tạo thẻ kỷ niệm
             PlantHistory history = new PlantHistory(
                     null,
                     userId,
@@ -181,6 +188,7 @@ public class MyPlantController {
                     deletedAt
             );
 
+            // Bước 5: Lưu thẻ + xóa nhật ký + xóa cây trong một batch
             myPlantRepository.deleteWithHistory(
                     userId, myPlantId, history,
                     successListener, failureListener);
