@@ -1,8 +1,12 @@
 package com.example.doanltdd_flynn.model;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import com.google.firebase.firestore.PropertyName;
+
 public class MyPlant {
+
     private String myPlantId;
     private String userId;
     private String plantId;
@@ -11,11 +15,14 @@ public class MyPlant {
     private String plantingDate;
     private String imageUrl;
     private String note;
-    public List<String> careDays;
+    private String status;
+
+    private List<String> careDays;
 
     // Constructor rỗng cho Firebase Firestore
     public MyPlant() {
         careDays = new ArrayList<>();
+        status = "DANG_TRONG";
     }
 
     // Constructor đầy đủ
@@ -32,6 +39,7 @@ public class MyPlant {
         this.plantingDate = plantingDate;
         this.imageUrl = imageUrl;
         this.note = note;
+        this.status = "DANG_TRONG";
 
         if (careDays != null) {
             this.careDays = careDays;
@@ -103,10 +111,20 @@ public class MyPlant {
     public void setNote(String note) {
         this.note = note;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @PropertyName("ngay_cham")
     public List<String> getCareDays() {
         return careDays;
     }
+
     @PropertyName("ngay_cham")
     public void setCareDays(List<String> careDays) {
         if (careDays != null) {
@@ -116,5 +134,3 @@ public class MyPlant {
         }
     }
 }
-
-
