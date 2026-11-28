@@ -1,4 +1,3 @@
-
 package com.example.doanltdd_flynn.repository;
 
 import com.example.doanltdd_flynn.model.PlantHistory;
@@ -73,4 +72,3 @@ public class PlantHistoryRepository {
                 .addOnFailureListener(failureListener);
     }
 }
-
