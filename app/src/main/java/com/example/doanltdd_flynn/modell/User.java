@@ -1,4 +1,3 @@
-
 package com.example.doanltdd_flynn.model;
 import com.google.firebase.firestore.PropertyName;
 
