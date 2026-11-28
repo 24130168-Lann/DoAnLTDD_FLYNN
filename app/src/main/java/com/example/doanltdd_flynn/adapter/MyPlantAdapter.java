@@ -1,5 +1,6 @@
 package com.example.doanltdd_flynn.adapter;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MyPlantAdapter
         extends RecyclerView.Adapter<MyPlantAdapter.MyPlantViewHolder> {
@@ -78,15 +80,9 @@ public class MyPlantAdapter
 
         holder.tvName.setText(plantName);
 
-        // Ngày trồng và thời gian đồng hành
-        String plantingDate = plant.getPlantingDate();
-
-        holder.tvInfo.setText(
-                "Trồng từ " + ChuoiUtil.display(plantingDate)
-                        + " · "
-                        + ChuoiUtil.calculateCompanionDays(plantingDate)
-                        + " ngày đồng hành"
-        );
+        // Trạng thái phát triển của cây
+        String plantStatus = getPlantStatusText(plant.getStatus());
+        holder.tvStatus.setText(plantStatus);
 
         // Chuỗi chăm sóc
         List<String> careDays = plant.getCareDays();
@@ -96,50 +92,7 @@ public class MyPlantAdapter
 
         holder.tvStreak.setText(currentStreak + " ngày");
 
-        // Trạng thái chăm sóc
-        String stateName = String.valueOf(
-                ChuoiUtil.getStreakState(careDays)
-        );
-
-        int backgroundColor;
-        int textColor;
-        String statusText;
-
-        if ("CARED_TODAY".equals(stateName)) {
-            statusText = "Đã chăm hôm nay";
-            backgroundColor = R.color.flynn_green_light;
-            textColor = R.color.flynn_green_dark;
-
-        } else if ("WAITING".equals(stateName)) {
-            statusText = "Chờ chăm sóc";
-            backgroundColor = R.color.flynn_orange_light;
-            textColor = R.color.flynn_orange;
-
-        } else {
-            statusText = "Chưa có chuỗi";
-            backgroundColor = R.color.flynn_grey_light;
-            textColor = R.color.flynn_grey;
-        }
-
-        holder.tvStatus.setText(statusText);
-
-        holder.tvStatus.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(
-                        ContextCompat.getColor(
-                                holder.itemView.getContext(),
-                                backgroundColor
-                        )
-                )
-        );
-
-        holder.tvStatus.setTextColor(
-                ContextCompat.getColor(
-                        holder.itemView.getContext(),
-                        textColor
-                )
-        );
-
-        // Kiểm tra cây đã thu hoạch hay chưa
+        // Kiểm tra cây đã thu hoạch chưa
         boolean isHarvested =
                 "DA_THU_HOACH".equalsIgnoreCase(
                         plant.getStatus() == null
@@ -147,12 +100,30 @@ public class MyPlantAdapter
                                 : plant.getStatus().trim()
                 );
 
-        holder.btnQuickCare.setEnabled(!isHarvested);
-        holder.btnQuickCare.setAlpha(
-                isHarvested ? 0.5f : 1.0f
+        // Kiểm tra hôm nay đã có nhật ký chăm sóc chưa
+        String stateName = String.valueOf(
+                ChuoiUtil.getStreakState(careDays)
         );
 
-        // Nhấn vào thẻ cây để xem chi tiết
+        boolean caredToday = "CARED_TODAY".equals(stateName);
+
+        // Cập nhật nút chăm sóc
+        if (isHarvested) {
+            holder.btnQuickCare.setText("Đã thu hoạch");
+
+        } else if (caredToday) {
+            holder.btnQuickCare.setText("✓ Đã chăm sóc");
+
+        } else {
+            holder.btnQuickCare.setText("Chăm nhanh");
+        }
+
+        boolean canQuickCare = !isHarvested && !caredToday;
+
+        holder.btnQuickCare.setEnabled(canQuickCare);
+        holder.btnQuickCare.setAlpha(canQuickCare ? 1.0f : 0.7f);
+
+        //Nhấn thẻ cây để xem chi tiết
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onItemClick(plant);
@@ -161,10 +132,41 @@ public class MyPlantAdapter
 
         // Nhấn nút chăm nhanh
         holder.btnQuickCare.setOnClickListener(v -> {
-            if (listener != null && !isHarvested) {
+            if (listener != null && canQuickCare) {
                 listener.onQuickCareClick(plant);
             }
         });
+    }
+
+    // Chuyển mã trạng thái thành nội dung hiển thị
+    private String getPlantStatusText(String status) {
+
+        if (status == null || status.trim().isEmpty()) {
+            return "Đang phát triển";
+        }
+
+        String value = status.trim().toUpperCase(Locale.ROOT);
+
+        switch (value) {
+            case "GIEO_HAT":
+                return "Gieo hạt";
+
+            case "NAY_MAM":
+                return "Nảy mầm";
+
+            case "DANG_TRONG":
+            case "DANG_PHAT_TRIEN":
+                return "Đang phát triển";
+
+            case "TRUONG_THANH":
+                return "Trưởng thành";
+
+            case "DA_THU_HOACH":
+                return "Đã thu hoạch";
+
+            default:
+                return "Đang phát triển";
+        }
     }
 
     @Override
@@ -177,9 +179,8 @@ public class MyPlantAdapter
 
         ImageView imgPlant;
         TextView tvName;
-        TextView tvInfo;
-        TextView tvStreak;
         TextView tvStatus;
+        TextView tvStreak;
         MaterialButton btnQuickCare;
 
         public MyPlantViewHolder(@NonNull View itemView) {
@@ -187,9 +188,8 @@ public class MyPlantAdapter
 
             imgPlant = itemView.findViewById(R.id.imgPlant);
             tvName = itemView.findViewById(R.id.tvName);
-            tvInfo = itemView.findViewById(R.id.tvInfo);
-            tvStreak = itemView.findViewById(R.id.tvStreak);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvStreak = itemView.findViewById(R.id.tvStreak);
             btnQuickCare = itemView.findViewById(R.id.btnQuickCare);
         }
     }
