@@ -1,5 +1,7 @@
 package com.example.doanltdd_flynn.model;
 
+import com.google.firebase.firestore.Exclude;
+
 public class PlantHistory {
 
     private String historyId;
@@ -86,7 +88,10 @@ public class PlantHistory {
     }
 
     // Tạo nội dung kỷ niệm khi cây bị xóa
+    // SỬA: thêm @Exclude, nếu không Firestore sẽ ghi thêm trường "memoryMessage" vào mỗi thẻ kỷ niệm.
+    @Exclude
     public String getMemoryMessage() {
         return "Bạn đã ở bên " + plantName
                 + " được " + companionDays + " ngày";
-    } }
+    }
+}
