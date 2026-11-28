@@ -1,29 +1,34 @@
 package com.example.doanltdd_flynn.ui;
 
+import android.net.Uri;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.doanltdd_flynn.R;
-import com.example.doanltdd_flynn.controller.CareController;
-import com.example.doanltdd_flynn.controller.MyPlantController;
 import com.example.doanltdd_flynn.model.CareLog;
 import com.example.doanltdd_flynn.model.CareType;
+import com.example.doanltdd_flynn.model.MyPlant;
+import com.example.doanltdd_flynn.repository.LocalTestStore;
 import com.example.doanltdd_flynn.utils.ChuoiUtil;
 import com.example.doanltdd_flynn.utils.UiUtil;
+
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class AddCareLogActivity extends AppCompatActivity {
 
@@ -32,132 +37,433 @@ public class AddCareLogActivity extends AppCompatActivity {
     public static final String EXTRA_LOG_DATE = "log_date";
     public static final String EXTRA_LOG_TYPE = "log_type";
     public static final String EXTRA_LOG_NOTE = "log_note";
+    public static final String EXTRA_LOG_CARE_TYPES = "log_care_types";
+    public static final String EXTRA_LOG_CONDITION = "log_condition";
+    public static final String EXTRA_LOG_IMAGE_URLS = "log_image_urls";
+    public static final String EXTRA_SELECTED_DATE = "selected_care_date";
 
-    private CareController careController;
-    private MyPlantController myPlantController;
-
-    private String userId;
     private String plantId;
-    private String logId;        
+    private String logId;
+
     private LocalDate careDate = ChuoiUtil.todayDate();
 
     private TextView tvPlantName;
     private TextView tvHint;
+    private TextView tvSelectedImages;
+
     private TextInputEditText etDate;
     private TextInputEditText etNote;
-    private MaterialAutoCompleteTextView actType;
+
+    private CheckBox cbWatering;
+    private CheckBox cbFertilizing;
+    private CheckBox cbPruning;
+    private CheckBox cbOther;
+
+    private RadioGroup rgPlantCondition;
+    private RadioButton rbGood;
+    private RadioButton rbNormal;
+    private RadioButton rbNeedsCare;
+
+    private MaterialButton btnChooseImages;
     private MaterialButton btnSave;
+
+    private ActivityResultLauncher<String> imagePickerLauncher;
+
+    private final List<Uri> selectedImageUris = new ArrayList<>();
+    private final List<String> imageUrls = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_add_care_log);
         UiUtil.applyEdgeToEdge(this, findViewById(R.id.root));
 
         plantId = getIntent().getStringExtra(EXTRA_PLANT_ID);
         logId = getIntent().getStringExtra(EXTRA_LOG_ID);
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (plantId == null || user == null) {
+
+        // Nhật ký mới nhận ngày được chọn từ lịch.
+        if (logId == null) {
+            LocalDate selectedDate = ChuoiUtil.toDate(
+                    getIntent().getStringExtra(EXTRA_SELECTED_DATE)
+            );
+
+            if (selectedDate != null) {
+                careDate = selectedDate;
+            }
+        }
+
+        // Kiểm tra cây trong bộ nhớ cục bộ.
+        if (plantId == null || LocalTestStore.getPlant(plantId) == null) {
+            Toast.makeText(
+                    this,
+                    "Không tìm thấy cây cần ghi nhật ký.",
+                    Toast.LENGTH_LONG
+            ).show();
+
             finish();
             return;
         }
-        userId = user.getUid();
-        careController = new CareController();
-        myPlantController = new MyPlantController();
+
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetMultipleContents(),
+                uris -> {
+                    if (uris != null && !uris.isEmpty()) {
+                        selectedImageUris.clear();
+                        selectedImageUris.addAll(uris);
+                        updateSelectedImagesText();
+                    }
+                }
+        );
+
+        bindViews();
+
         boolean editing = logId != null;
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(editing ? "Sửa nhật ký" : "Ghi nhật ký");
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        tvPlantName = findViewById(R.id.tvPlantName);
-        tvHint = findViewById(R.id.tvHint);
-        etDate = findViewById(R.id.etDate);
-        etNote = findViewById(R.id.etNote);
-        actType = findViewById(R.id.actType);
-        btnSave = findViewById(R.id.btnSave);
+        // Không tự chọn sẵn checklist hoặc tình trạng cây.
+        cbWatering.setChecked(false);
+        cbFertilizing.setChecked(false);
+        cbPruning.setChecked(false);
+        cbOther.setChecked(false);
+        rgPlantCondition.clearCheck();
 
-        // Danh sách loại chăm sóc (WATERING, FERTILIZING, PRUNING, OTHER) hiển thị bằng tiếng Việt
-        actType.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                UiUtil.careTypeLabels()));
-        actType.setText(UiUtil.careTypeLabel(CareType.WATERING), false);
-
+        // Nếu đang sửa thì khôi phục dữ liệu nhật ký cũ.
         if (editing) {
-            LocalDate old = ChuoiUtil.toDate(getIntent().getStringExtra(EXTRA_LOG_DATE));
-            if (old != null) careDate = old;
-            CareType oldType;
-            try {
-                oldType = CareType.valueOf(getIntent().getStringExtra(EXTRA_LOG_TYPE));
-            } catch (Exception e) {
-                oldType = CareType.OTHER;
-            }
-            actType.setText(UiUtil.careTypeLabel(oldType), false);
-            etNote.setText(getIntent().getStringExtra(EXTRA_LOG_NOTE));
+            loadOldLogData();
             btnSave.setText("Lưu thay đổi");
         }
-        etDate.setText(ChuoiUtil.display(ChuoiUtil.toKey(careDate)));
+
+        updateDateText();
+        lockDateField();
         updateHint();
+        updateSelectedImagesText();
+        loadPlantName();
 
-        etDate.setOnClickListener(v -> UiUtil.pickDate(this, careDate, date -> {
-            careDate = date;
-            etDate.setText(ChuoiUtil.display(ChuoiUtil.toKey(date)));
-            updateHint();
-        }));
+        btnChooseImages.setOnClickListener(v ->
+                imagePickerLauncher.launch("image/*")
+        );
+
         btnSave.setOnClickListener(v -> save());
+    }
 
-        // Hiển thị tên cây đang ghi nhật ký
-        myPlantController.getMyPlantDetail(userId, plantId,
-                plant -> {
-                    if (isFinishing()) return;
-                    if (plant == null) {
-                        Toast.makeText(this, "Không tìm thấy cây", Toast.LENGTH_LONG).show();
-                        finish();
-                        return;
-                    }
-                    tvPlantName.setText(plant.getPlantName());
-                },
-                e -> tvPlantName.setText(""));
+    private void bindViews() {
+
+        tvPlantName = findViewById(R.id.tvPlantName);
+        tvHint = findViewById(R.id.tvHint);
+        tvSelectedImages = findViewById(R.id.tvSelectedImages);
+
+        etDate = findViewById(R.id.etDate);
+        etNote = findViewById(R.id.etNote);
+
+        cbWatering = findViewById(R.id.cbWatering);
+        cbFertilizing = findViewById(R.id.cbFertilizing);
+        cbPruning = findViewById(R.id.cbPruning);
+        cbOther = findViewById(R.id.cbOther);
+
+        rgPlantCondition = findViewById(R.id.rgPlantCondition);
+        rbGood = findViewById(R.id.rbGood);
+        rbNormal = findViewById(R.id.rbNormal);
+        rbNeedsCare = findViewById(R.id.rbNeedsCare);
+
+        btnChooseImages = findViewById(R.id.btnChooseImages);
+        btnSave = findViewById(R.id.btnSave);
+    }
+
+    // Hiển thị đúng tên cây đang được mở.
+    private void loadPlantName() {
+
+        MyPlant plant = LocalTestStore.getPlant(plantId);
+
+        if (plant == null) {
+            tvPlantName.setText("Không tìm thấy cây");
+            return;
+        }
+
+        String name = plant.getPlantName();
+
+        if (name == null || name.trim().isEmpty()) {
+            tvPlantName.setText("Chưa có tên cây");
+        } else {
+            tvPlantName.setText(name);
+        }
+    }
+
+    // Ngày chăm sóc chỉ hiển thị, không cho chỉnh sửa.
+    private void lockDateField() {
+
+        etDate.setFocusable(false);
+        etDate.setFocusableInTouchMode(false);
+        etDate.setClickable(false);
+        etDate.setLongClickable(false);
+        etDate.setCursorVisible(false);
+        etDate.setOnClickListener(null);
+
+        View dateContainer = findViewById(R.id.tilDate);
+
+        if (dateContainer != null) {
+            dateContainer.setClickable(false);
+            dateContainer.setFocusable(false);
+            dateContainer.setOnClickListener(null);
+        }
+    }
+
+    private void updateDateText() {
+
+        etDate.setText(
+                ChuoiUtil.display(
+                        ChuoiUtil.toKey(careDate)
+                )
+        );
+    }
+
+    // Khôi phục dữ liệu cũ khi sửa nhật ký.
+    private void loadOldLogData() {
+
+        LocalDate oldDate = ChuoiUtil.toDate(
+                getIntent().getStringExtra(EXTRA_LOG_DATE)
+        );
+
+        if (oldDate != null) {
+            careDate = oldDate;
+        }
+
+        ArrayList<String> oldTypes =
+                getIntent().getStringArrayListExtra(EXTRA_LOG_CARE_TYPES);
+
+        if (oldTypes != null && !oldTypes.isEmpty()) {
+
+            cbWatering.setChecked(
+                    oldTypes.contains(CareType.WATERING.name())
+            );
+
+            cbFertilizing.setChecked(
+                    oldTypes.contains(CareType.FERTILIZING.name())
+            );
+
+            cbPruning.setChecked(
+                    oldTypes.contains(CareType.PRUNING.name())
+            );
+
+            cbOther.setChecked(
+                    oldTypes.contains(CareType.OTHER.name())
+            );
+
+        } else {
+
+            String oldTypeName =
+                    getIntent().getStringExtra(EXTRA_LOG_TYPE);
+
+            if (oldTypeName != null) {
+                try {
+                    CareType oldType = CareType.valueOf(oldTypeName);
+
+                    cbWatering.setChecked(oldType == CareType.WATERING);
+                    cbFertilizing.setChecked(oldType == CareType.FERTILIZING);
+                    cbPruning.setChecked(oldType == CareType.PRUNING);
+                    cbOther.setChecked(oldType == CareType.OTHER);
+
+                } catch (Exception e) {
+                    // Không chọn công việc nếu dữ liệu cũ không hợp lệ.
+                }
+            }
+        }
+
+        String condition =
+                getIntent().getStringExtra(EXTRA_LOG_CONDITION);
+
+        if (CareLog.CONDITION_GOOD.equals(condition)) {
+            rbGood.setChecked(true);
+        } else if (CareLog.CONDITION_NEEDS_CARE.equals(condition)) {
+            rbNeedsCare.setChecked(true);
+        } else if (CareLog.CONDITION_NORMAL.equals(condition)) {
+            rbNormal.setChecked(true);
+        } else {
+            rgPlantCondition.clearCheck();
+        }
+
+        etNote.setText(
+                getIntent().getStringExtra(EXTRA_LOG_NOTE)
+        );
+
+        ArrayList<String> oldImages =
+                getIntent().getStringArrayListExtra(EXTRA_LOG_IMAGE_URLS);
+
+        if (oldImages != null) {
+            imageUrls.clear();
+            imageUrls.addAll(oldImages);
+        }
     }
 
     private void updateHint() {
+
         if (logId != null) {
-            tvHint.setText("Sửa nhật ký không làm thay đổi chuỗi của cây.");
+
+            tvHint.setText(
+                    "Em có thể cập nhật nội dung nhật ký đã ghi trước đó."
+            );
+
         } else if (careDate.equals(ChuoiUtil.todayDate())) {
-            tvHint.setText("Nhật ký ngày hôm nay được tính là chăm sóc: cây này sẽ có thêm một ngày chăm. "
-                    + "Ghi nhiều nhật ký trong cùng ngày vẫn chỉ tính một ngày.");
+
+            tvHint.setText(
+                    "Nhật ký hôm nay được tính là một ngày chăm sóc. "
+                            + "Nhiều nhật ký trong cùng ngày vẫn chỉ tính một ngày."
+            );
+
         } else {
-            tvHint.setText("Nhật ký cho ngày quá khứ vẫn được lưu nhưng không làm thay đổi chuỗi.");
+
+            tvHint.setText(
+                    "Nhật ký ngày quá khứ vẫn được lưu "
+                            + "nhưng không làm thay đổi chuỗi chăm sóc."
+            );
         }
     }
 
-    private void save() {
-        String note = etNote.getText() == null ? "" : etNote.getText().toString();
-        CareType type = UiUtil.careTypeFromLabel(actType.getText() == null ? "" : actType.getText().toString());
+    private List<CareType> getSelectedCareTypes() {
+
+        List<CareType> careTypes = new ArrayList<>();
+
+        if (cbWatering.isChecked()) {
+            careTypes.add(CareType.WATERING);
+        }
+
+        if (cbFertilizing.isChecked()) {
+            careTypes.add(CareType.FERTILIZING);
+        }
+
+        if (cbPruning.isChecked()) {
+            careTypes.add(CareType.PRUNING);
+        }
+
+        if (cbOther.isChecked()) {
+            careTypes.add(CareType.OTHER);
+        }
+
+        return careTypes;
+    }
+
+    private String getSelectedCondition() {
+
+        int selectedId = rgPlantCondition.getCheckedRadioButtonId();
+
+        if (selectedId == R.id.rbGood) {
+            return CareLog.CONDITION_GOOD;
+        }
+
+        if (selectedId == R.id.rbNeedsCare) {
+            return CareLog.CONDITION_NEEDS_CARE;
+        }
+
+        if (selectedId == R.id.rbNormal) {
+            return CareLog.CONDITION_NORMAL;
+        }
+
+        return null;
+    }
+
+    private void updateSelectedImagesText() {
+
+        int total = imageUrls.size() + selectedImageUris.size();
+
+        tvSelectedImages.setText(
+                "Đã chọn " + total + " ảnh"
+        );
+    }
+
+    // Tạo đối tượng nhật ký.
+    private CareLog createCareLog() {
+
+        String note = etNote.getText() == null
+                ? ""
+                : etNote.getText().toString().trim();
 
         CareLog log = new CareLog();
+
         log.setCareLogId(logId);
         log.setMyPlantId(plantId);
         log.setCareDate(ChuoiUtil.toKey(careDate));
-        log.setCareType(type);
+
+        log.setCareTypes(getSelectedCareTypes());
+        log.setPlantCondition(getSelectedCondition());
         log.setNote(note);
 
-        btnSave.setEnabled(false);
-        if (logId != null) {
-            careController.updateCareLog(userId, log, unused -> onSaved("Đã cập nhật nhật ký"), this::onFailed);
-        } else {
-            careController.addCareLog(userId, log, unused -> onSaved("Đã lưu nhật ký"), this::onFailed);
+        // Chế độ kiểm thử: lưu URI ảnh cục bộ, chưa tải lên Firebase.
+        List<String> allImages = new ArrayList<>(imageUrls);
+
+        for (Uri uri : selectedImageUris) {
+            String imageUri = uri.toString();
+
+            if (!allImages.contains(imageUri)) {
+                allImages.add(imageUri);
+            }
         }
+
+        log.setImageUrls(allImages);
+
+        return log;
     }
 
-    private void onSaved(String message) {
-        btnSave.setEnabled(true);
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    private void save() {
+
+        if (careDate.isAfter(ChuoiUtil.todayDate())) {
+            Toast.makeText(
+                    this,
+                    "Không thể ghi nhật ký cho ngày trong tương lai.",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        CareLog log = createCareLog();
+
+        boolean hasChecklist = !log.getCareTypes().isEmpty();
+
+        boolean hasNote = log.getNote() != null
+                && !log.getNote().trim().isEmpty();
+
+        boolean hasImage = log.getImageUrls() != null
+                && !log.getImageUrls().isEmpty();
+
+        // Chỉ cần có ít nhất một trong ba nội dung là được lưu.
+        if (!hasChecklist && !hasNote && !hasImage) {
+
+            Toast.makeText(
+                    this,
+                    "Em hãy chọn công việc, ghi chú hoặc thêm hình ảnh.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
+
+        btnSave.setEnabled(false);
+
+        if (logId != null) {
+
+            LocalTestStore.updateCareLog(log);
+
+            Toast.makeText(
+                    this,
+                    "Đã cập nhật nhật ký.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+        } else {
+
+            log.setCareLogId(UUID.randomUUID().toString());
+
+            LocalTestStore.addCareLog(log);
+
+            Toast.makeText(
+                    this,
+                    "Đã lưu nhật ký.",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+
         finish();
     }
-
-    private void onFailed(Exception e) {
-        btnSave.setEnabled(true);
-        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-    }
 }
-
