@@ -22,7 +22,6 @@ import com.example.doanltdd_flynn.utils.UiUtil;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -33,15 +32,17 @@ import java.util.List;
 
 public class AddMyPlantActivity extends AppCompatActivity {
 
-    private static final int MAX_CHIPS = 10;
-
     private MyPlantController myPlantController;
 
-    private MaterialAutoCompleteTextView actName;
+    // Ô tìm cây trong Bách khoa
+    private MaterialAutoCompleteTextView actSearch;
+
+    // Ô nhập tên cây để lưu vào vườn cá nhân
+    private TextInputEditText etName;
+
     private TextInputEditText etDate;
     private TextInputEditText etNote;
 
-    private ChipGroup chipSuggestions;
     private ChipGroup chipStage;
 
     private MaterialButton btnSave;
@@ -63,7 +64,6 @@ public class AddMyPlantActivity extends AppCompatActivity {
                 findViewById(R.id.root)
         );
 
-        // Khởi tạo Controller để tải danh sách gợi ý cây.
         myPlantController = new MyPlantController();
 
         // Thanh tiêu đề
@@ -71,14 +71,16 @@ public class AddMyPlantActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         // Ánh xạ giao diện
-        actName = findViewById(R.id.actName);
+        actSearch = findViewById(R.id.actSearch);
+        etName = findViewById(R.id.actName);
         etDate = findViewById(R.id.etDate);
         etNote = findViewById(R.id.etNote);
 
-        chipSuggestions = findViewById(R.id.chipSuggestions);
         chipStage = findViewById(R.id.chipStage);
-
         btnSave = findViewById(R.id.btnSave);
+
+        // Chỉ hiện gợi ý sau khi nhập ít nhất 1 ký tự
+        actSearch.setThreshold(1);
 
         // Mặc định chọn giai đoạn Phát triển
         chipStage.check(R.id.chipGrowing);
@@ -107,8 +109,9 @@ public class AddMyPlantActivity extends AppCompatActivity {
                 )
         );
 
-        // Theo dõi tên cây được nhập
-        actName.addTextChangedListener(new TextWatcher() {
+        // Khi người dùng tự sửa tên cây,
+        // kiểm tra xem tên đó có trùng cây trong Bách khoa không
+        etName.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void beforeTextChanged(
@@ -130,21 +133,38 @@ public class AddMyPlantActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                selectedPlantId = findPlantId(s.toString());
+            }
+        });
 
-                selectedPlantId = findPlantId(
-                        s.toString()
-                );
+        // Chọn một cây từ danh sách tìm kiếm
+        actSearch.setOnItemClickListener((parent, view, position, id) -> {
+
+            String selectedName = (String) parent.getItemAtPosition(position);
+
+            PlantSuggestion selectedPlant = findSuggestion(selectedName);
+
+            if (selectedPlant != null) {
+
+                // Điền tên cây vào ô thông tin cây
+                etName.setText(selectedPlant.getName());
+
+                // Gán đúng ID tài liệu Firebase
+                selectedPlantId = selectedPlant.getPlantId();
+
+                // Xóa thông báo lỗi nếu có
+                etName.setError(null);
             }
         });
 
         // Nút lưu cây
         btnSave.setOnClickListener(v -> save());
 
-        // Tải danh sách gợi ý
+        // Tải danh sách cây từ Firebase
         loadSuggestions();
     }
 
-   
+    
 
     private void loadSuggestions() {
 
@@ -160,65 +180,60 @@ public class AddMyPlantActivity extends AppCompatActivity {
 
                     List<String> names = new ArrayList<>();
 
-                    for (PlantSuggestion p : suggestions) {
-                        names.add(p.getName());
+                    for (PlantSuggestion plant : suggestions) {
+
+                        names.add(plant.getName());
                     }
 
-                    actName.setAdapter(
-                            new SuggestionAdapter(this, names)
-                    );
+                    SuggestionAdapter adapter =
+                            new SuggestionAdapter(this, names);
 
-                    chipSuggestions.removeAllViews();
-
-                    int count = 0;
-
-                    for (PlantSuggestion p : suggestions) {
-
-                        if (count++ >= MAX_CHIPS) {
-                            break;
-                        }
-
-                        Chip chip = new Chip(this);
-
-                        chip.setText(p.getName());
-
-                        chip.setOnClickListener(v -> {
-
-                            actName.setText(
-                                    p.getName(),
-                                    false
-                            );
-
-                            actName.setSelection(
-                                    p.getName().length()
-                            );
-                        });
-
-                        chipSuggestions.addView(chip);
-                    }
+                    actSearch.setAdapter(adapter);
                 },
 
                 e -> {
-                    // Không có gợi ý vẫn cho phép nhập tên cây thủ công.
+
+                    if (isFinishing() || isDestroyed()) {
+                        return;
+                    }
+
+                    Toast.makeText(
+                            this,
+                            "Không thể tải danh sách cây từ Bách khoa",
+                            Toast.LENGTH_LONG
+                    ).show();
                 }
         );
+    }
+
+    
+
+    private PlantSuggestion findSuggestion(String name) {
+
+        String key = TextUtil.normalize(name);
+
+        if (key.isEmpty()) {
+            return null;
+        }
+
+        for (PlantSuggestion plant : suggestions) {
+
+            if (TextUtil.normalize(plant.getName()).equals(key)) {
+                return plant;
+            }
+        }
+
+        return null;
     }
 
    
 
     private String findPlantId(String typedName) {
 
-        String key = TextUtil.normalize(typedName);
+        PlantSuggestion plant = findSuggestion(typedName);
 
-        if (key.isEmpty()) {
-            return null;
-        }
-
-        for (PlantSuggestion p : suggestions) {
-
-            if (TextUtil.normalize(p.getName()).equals(key)) {
-                return p.getPlantId();
-            }
+        if (plant != null) {
+            return plant.getPlantId();
         }
 
         return null;
@@ -242,7 +257,6 @@ public class AddMyPlantActivity extends AppCompatActivity {
             return "DANG_PHAT_TRIEN";
         }
 
-        // Nếu không có lựa chọn thì mặc định là Phát triển
         return "DANG_PHAT_TRIEN";
     }
 
@@ -250,9 +264,9 @@ public class AddMyPlantActivity extends AppCompatActivity {
 
     private void save() {
 
-        String name = actName.getText() == null
+        String name = etName.getText() == null
                 ? ""
-                : actName.getText().toString().trim();
+                : etName.getText().toString().trim();
 
         String note = etNote.getText() == null
                 ? ""
@@ -261,9 +275,8 @@ public class AddMyPlantActivity extends AppCompatActivity {
         // Kiểm tra tên cây
         if (name.isEmpty()) {
 
-            actName.setError("Vui lòng nhập tên cây");
-
-            actName.requestFocus();
+            etName.setError("Vui lòng nhập tên cây");
+            etName.requestFocus();
 
             return;
         }
@@ -271,7 +284,7 @@ public class AddMyPlantActivity extends AppCompatActivity {
         // Tạo đối tượng cây
         MyPlant plant = new MyPlant();
 
-        // Không sử dụng tài khoản giả trong chế độ kiểm thử
+        // Giữ nguyên cơ chế kiểm thử hiện tại
         plant.setUserId(null);
 
         plant.setPlantName(name);
@@ -284,7 +297,6 @@ public class AddMyPlantActivity extends AppCompatActivity {
 
         plant.setNote(note.trim());
 
-        // Lưu đúng giai đoạn người dùng đã chọn
         plant.setStatus(getSelectedStage());
 
         // Khóa nút trong lúc lưu
@@ -292,7 +304,7 @@ public class AddMyPlantActivity extends AppCompatActivity {
 
         try {
 
-            // Lưu cây vào bộ nhớ cục bộ, không gọi Firebase
+            // Lưu cây vào bộ nhớ cục bộ
             LocalTestStore.addPlant(plant);
 
             Toast.makeText(
@@ -315,7 +327,7 @@ public class AddMyPlantActivity extends AppCompatActivity {
         }
     }
 
-  
+   
 
     private static class SuggestionAdapter extends ArrayAdapter<String> {
 
@@ -331,8 +343,6 @@ public class AddMyPlantActivity extends AppCompatActivity {
             );
 
             this.all = new ArrayList<>(names);
-
-            this.shown.addAll(all);
         }
 
         @Override
@@ -354,28 +364,29 @@ public class AddMyPlantActivity extends AppCompatActivity {
                 @Override
                 protected FilterResults performFiltering(CharSequence constraint) {
 
-                    String q = TextUtil.normalize(
+                    String keyword = TextUtil.normalize(
                             constraint == null
                                     ? ""
                                     : constraint.toString()
                     );
 
-                    List<String> out = new ArrayList<>();
+                    List<String> resultList = new ArrayList<>();
 
-                    for (String s : all) {
+                    // Không hiển thị danh sách khi chưa nhập ký tự
+                    if (!keyword.isEmpty()) {
 
-                        if (q.isEmpty()
-                                || TextUtil.normalize(s).contains(q)) {
+                        for (String name : all) {
 
-                            out.add(s);
+                            if (TextUtil.normalize(name).contains(keyword)) {
+                                resultList.add(name);
+                            }
                         }
                     }
 
                     FilterResults results = new FilterResults();
 
-                    results.values = out;
-
-                    results.count = out.size();
+                    results.values = resultList;
+                    results.count = resultList.size();
 
                     return results;
                 }
@@ -390,6 +401,7 @@ public class AddMyPlantActivity extends AppCompatActivity {
                     shown.clear();
 
                     if (results.values != null) {
+
                         shown.addAll(
                                 (List<String>) results.values
                         );
@@ -400,7 +412,6 @@ public class AddMyPlantActivity extends AppCompatActivity {
 
                 @Override
                 public CharSequence convertResultToString(Object resultValue) {
-
                     return (String) resultValue;
                 }
             };
