@@ -28,8 +28,7 @@
         android:fillViewport="true"
         android:clipToPadding="false"
         android:scrollbars="vertical"
-        android:overScrollMode="always"
-        >
+        android:overScrollMode="always">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -79,7 +78,6 @@
                         android:textSize="12sp" />
 
                 </LinearLayout>
-
             </LinearLayout>
 
             <!-- Tìm kiếm -->
@@ -182,14 +180,19 @@
 
                     </LinearLayout>
 
+                    <!-- Nút chọn cà chua -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSelectTomato"
-                        android:layout_width="76dp"
-                        android:layout_height="36dp"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
+                        android:layout_width="84dp"
+                        android:layout_height="40dp"
+                        android:minWidth="84dp"
+                        android:minHeight="40dp"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp"
+                        android:gravity="center"
                         android:text="Chọn"
                         android:textSize="12sp"
+                        android:maxLines="1"
                         app:cornerRadius="10dp" />
 
                 </LinearLayout>
@@ -250,14 +253,19 @@
 
                     </LinearLayout>
 
+                    <!-- Nút chọn húng quế -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSelectBasil"
-                        android:layout_width="76dp"
-                        android:layout_height="36dp"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
+                        android:layout_width="84dp"
+                        android:layout_height="40dp"
+                        android:minWidth="84dp"
+                        android:minHeight="40dp"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp"
+                        android:gravity="center"
                         android:text="Chọn"
                         android:textSize="12sp"
+                        android:maxLines="1"
                         app:cornerRadius="10dp" />
 
                 </LinearLayout>
