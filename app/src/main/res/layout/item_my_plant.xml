@@ -24,8 +24,8 @@
         <!-- Ảnh cây -->
         <ImageView
             android:id="@+id/imgPlant"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:background="@drawable/bg_avatar"
             android:clipToOutline="true"
             android:contentDescription="Ảnh cây trồng"
@@ -40,6 +40,7 @@
             android:layout_marginStart="12dp"
             android:orientation="vertical">
 
+            <!-- Tên cây -->
             <TextView
                 android:id="@+id/tvName"
                 android:layout_width="match_parent"
@@ -47,31 +48,36 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="Tên cây"
-                android:textColor="#26352B"                android:textSize="16sp"
+                android:textColor="#26352B"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
+            <!-- Trạng thái phát triển của cây -->
             <TextView
-                android:id="@+id/tvInfo"
-                android:layout_width="match_parent"
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="Trồng từ 01/01/2026 · 10 ngày đồng hành"
-                android:textColor="@color/flynn_text_secondary"
-                android:textSize="12sp" />
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_status"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="Đang phát triển"
+                android:textColor="@color/flynn_green_dark"
+                android:textSize="11sp" />
 
-            <!-- Chuỗi chăm sóc và trạng thái -->
+            <!-- Chuỗi chăm sóc -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="17dp"
+                    android:layout_height="17dp"
                     android:contentDescription="Chuỗi chăm sóc"
                     android:src="@drawable/ic_fire" />
 
@@ -79,42 +85,30 @@
                     android:id="@+id/tvStreak"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginStart="5dp"
                     android:text="0 ngày"
-                    android:textColor="#26352B"                    android:textSize="12sp"
+                    android:textColor="#26352B"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="7dp"
-                    android:background="@drawable/bg_status"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:text="Chưa có chuỗi"
-                    android:textColor="@color/flynn_grey"
-                    android:textSize="10sp" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Nút chăm nhanh -->
+        <!-- Nút chăm sóc -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnQuickCare"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginStart="6dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
             android:minWidth="0dp"
-            android:minHeight="36dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:minHeight="40dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:text="Chăm nhanh"
-            android:textSize="11sp"
+            android:textAllCaps="false"
+            android:textSize="12sp"
             app:cornerRadius="10dp" />
 
     </LinearLayout>
