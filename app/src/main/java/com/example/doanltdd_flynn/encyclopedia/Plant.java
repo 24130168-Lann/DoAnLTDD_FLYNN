@@ -298,7 +298,7 @@ public class Plant {
 
     @PropertyName("muc_4_tieu_de")
     public void setMuc4TieuDe(String muc_4_tieu_de) {
-        this.muc_4_tieu_de = muc_4_ten_tab;
+        this.muc_4_tieu_de = muc_4_tieu_de;
     }
 
     @PropertyName("muc_4_noi_dung")

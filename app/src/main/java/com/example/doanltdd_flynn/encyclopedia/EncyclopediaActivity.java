@@ -1,12 +1,12 @@
 package com.example.doanltdd_flynn.encyclopedia;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import com.google.android.material.button.MaterialButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -19,10 +19,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.doanltdd_flynn.R;
+import com.google.android.material.button.MaterialButton;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class EncyclopediaActivity extends AppCompatActivity {
 
@@ -44,8 +47,10 @@ public class EncyclopediaActivity extends AppCompatActivity {
     private PlantRepository plantRepository;
     private PlantAdapter plantAdapter;
 
+    private final List<Plant> allPlants = new ArrayList<>();
     private String selectedCategory = "Tất cả";
     private final List<MaterialButton> categoryButtons = new ArrayList<>();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +62,7 @@ public class EncyclopediaActivity extends AppCompatActivity {
         setupRecyclerView();
         setupSearch();
 
-        fetchPlants();
+        loadAllPlants();
     }
 
     private void initViews() {
@@ -67,6 +72,7 @@ public class EncyclopediaActivity extends AppCompatActivity {
         tvEncyclopediaStatus = findViewById(R.id.tvEncyclopediaStatus);
         rvPlants = findViewById(R.id.rvPlants);
     }
+
     private void setupCategoryChips() {
         categoryContainer.removeAllViews();
         categoryButtons.clear();
@@ -95,7 +101,7 @@ public class EncyclopediaActivity extends AppCompatActivity {
             chip.setOnClickListener(v -> {
                 selectedCategory = category;
                 updateCategoryChipStyles();
-                fetchPlants();
+                applyFilters();
             });
 
             categoryContainer.addView(chip);
@@ -113,13 +119,12 @@ public class EncyclopediaActivity extends AppCompatActivity {
         for (int i = 0; i < CATEGORIES.size(); i++) {
             MaterialButton chip = categoryButtons.get(i);
             boolean isSelected = CATEGORIES.get(i).equals(selectedCategory);
-            chip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+            chip.setBackgroundTintList(ColorStateList.valueOf(
                     isSelected ? activeBg : inactiveBg
             ));
             chip.setTextColor(isSelected ? Color.WHITE : inactiveText);
         }
     }
-
 
     private void setupRecyclerView() {
         plantAdapter = new PlantAdapter(plant -> {
@@ -139,7 +144,7 @@ public class EncyclopediaActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                fetchPlants();
+                applyFilters();
             }
 
             @Override
@@ -148,22 +153,17 @@ public class EncyclopediaActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchPlants() {
-        String keyword = etSearchPlant.getText() != null ? etSearchPlant.getText().toString() : "";
+    private void loadAllPlants() {
         progressEncyclopedia.setVisibility(View.VISIBLE);
         tvEncyclopediaStatus.setVisibility(View.GONE);
 
-        plantRepository.searchPlants(keyword, selectedCategory, new PlantRepository.PlantListCallback() {
+        plantRepository.getAllPlants(new PlantRepository.PlantListCallback() {
             @Override
             public void onSuccess(@NonNull List<Plant> plants) {
                 progressEncyclopedia.setVisibility(View.GONE);
-                plantAdapter.setItems(plants);
-                if (plants.isEmpty()) {
-                    tvEncyclopediaStatus.setText("Không tìm thấy cây phù hợp.");
-                    tvEncyclopediaStatus.setVisibility(View.VISIBLE);
-                } else {
-                    tvEncyclopediaStatus.setVisibility(View.GONE);
-                }
+                allPlants.clear();
+                allPlants.addAll(plants);
+                applyFilters();
             }
 
             @Override
@@ -173,5 +173,74 @@ public class EncyclopediaActivity extends AppCompatActivity {
                 tvEncyclopediaStatus.setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    private void applyFilters() {
+        String normalizedKeyword = normalizeText(
+                etSearchPlant.getText() != null ? etSearchPlant.getText().toString() : ""
+        );
+
+        List<Plant> filtered = new ArrayList<>();
+        for (Plant plant : allPlants) {
+            if (plant == null) continue;
+
+            if (!matchesCategory(plant.getNhomCay(), selectedCategory)) {
+                continue;
+            }
+
+            if (!normalizedKeyword.isEmpty()) {
+                String vi = normalizeText(plant.getTenTiengViet());
+                String sci = normalizeText(plant.getTenKhoaHoc());
+                String en = normalizeText(plant.getTenTiengAnh());
+                String group = normalizeText(plant.getNhomCay());
+
+                if (!vi.contains(normalizedKeyword)
+                        && !sci.contains(normalizedKeyword)
+                        && !en.contains(normalizedKeyword)
+                        && !group.contains(normalizedKeyword)) {
+                    continue;
+                }
+            }
+
+            filtered.add(plant);
+        }
+
+        plantAdapter.setItems(filtered);
+        if (filtered.isEmpty()) {
+            tvEncyclopediaStatus.setText("Không tìm thấy cây phù hợp.");
+            tvEncyclopediaStatus.setVisibility(View.VISIBLE);
+        } else {
+            tvEncyclopediaStatus.setVisibility(View.GONE);
+        }
+    }
+
+    private boolean matchesCategory(String nhomCay, String tab) {
+        if (tab == null || "Tất cả".equals(tab)) {
+            return true;
+        }
+        String g = normalizeText(nhomCay);
+
+        switch (tab) {
+            case "Hoa cảnh":
+                return g.contains("hoa") || g.contains("canh");
+            case "Cây ăn quả":
+                return g.contains("an qua") || g.contains("trai cay");
+            case "Rau & Cây gia vị":
+                return g.contains("rau") || g.contains("gia vi") || g.contains("duoc lieu") || g.contains("luong thuc");
+            case "Cây gỗ & Cây bóng mát":
+                return g.contains("go") || g.contains("bong mat");
+            case "Cây thủy sinh & Bonsai":
+                return g.contains("thuy sinh") || g.contains("bonsai");
+            default:
+                return g.equals(normalizeText(tab));
+        }
+    }
+
+    private String normalizeText(String input) {
+        if (input == null) return "";
+        String temp = Normalizer.normalize(input.trim().toLowerCase(Locale.ROOT), Normalizer.Form.NFD);
+        return temp.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .replace('đ', 'd')
+                .replace('Đ', 'd');
     }
 }
